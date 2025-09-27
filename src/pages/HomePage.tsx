@@ -209,7 +209,7 @@ const HomePage: React.FC = () => {
           <div className="flex items-center">
             <Youtube className="w-8 h-8 text-red-500 mr-3" />
             <h1 className="text-2xl font-bold text-gray-900">
-              YouTube トランスクリプト翻訳
+              YouTube 動画保存
             </h1>
           </div>
         </div>
@@ -333,14 +333,14 @@ const HomePage: React.FC = () => {
                       
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
                         <span>{formatDate(video.created_at)}</span>
-                        <div className="flex items-center space-x-3">
+                        {/* <div className="flex items-center space-x-3">
                           {video.transcript_count && video.transcript_count > 0 && (
                             <span className="flex items-center">
                               <Languages className="w-3 h-3 mr-1" />
                               {video.translation_count || 0}/{video.transcript_count}
                             </span>
                           )}
-                        </div>
+                        </div> */}
                       </div>
                       
                       {/* アクションボタン */}

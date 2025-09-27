@@ -2,39 +2,39 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Settings, Download, Share2, AlertCircle, RefreshCw } from 'lucide-react'
 import VideoPlayer from '../components/VideoPlayer'
-import TranscriptDisplay from '../components/TranscriptDisplay'
+// import TranscriptDisplay from '../components/TranscriptDisplay'
 import { supabase } from '../lib/supabase'
 import type { Video } from '../lib/supabase'
 
-interface TranscriptItem {
-  id: string
-  start_time: number
-  end_time: number
-  original_text: string
-  translated_text?: string | null
-  language_code: string
-}
+// interface TranscriptItem {
+//   id: string
+//   start_time: number
+//   end_time: number
+//   original_text: string
+//   translated_text?: string | null
+//   language_code: string
+// }
 
-interface TranslationJob {
-  id: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
-  progress: number
-  target_language: string
-  estimated_completion?: string
-}
+// interface TranslationJob {
+//   id: string
+//   status: 'pending' | 'processing' | 'completed' | 'failed'
+//   progress: number
+//   target_language: string
+//   estimated_completion?: string
+// }
 
 const WatchPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>()
   const navigate = useNavigate()
   
   const [video, setVideo] = useState<Video | null>(null)
-  const [transcripts, setTranscripts] = useState<TranscriptItem[]>([])
+  // const [transcripts, setTranscripts] = useState<TranscriptItem[]>([])
   const [currentTime, setCurrentTime] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [translationJob, setTranslationJob] = useState<TranslationJob | null>(null)
-  const [targetLanguage, setTargetLanguage] = useState('ja')
-  const [playerRef, setPlayerRef] = useState<HTMLVideoElement | null>(null)
+  // const [translationJob, setTranslationJob] = useState<TranslationJob | null>(null)
+  // const [targetLanguage, setTargetLanguage] = useState('ja')
+  const [playerRef, setPlayerRef] = useState<any>(null)
 
   // 動画データとトランスクリプトを取得
   const fetchVideoData = useCallback(async () => {
@@ -62,64 +62,64 @@ const WatchPage: React.FC = () => {
 
       setVideo(videoData)
 
-      // トランスクリプトを取得
-      const { data: transcriptData, error: transcriptError } = await supabase
-        .from('transcripts')
-        .select('*')
-        .eq('video_id', videoData.id)
-        .order('start_time', { ascending: true })
+      // // トランスクリプトを取得
+      // const { data: transcriptData, error: transcriptError } = await supabase
+      //   .from('transcripts')
+      //   .select('*')
+      //   .eq('video_id', videoData.id)
+      //   .order('start_time', { ascending: true })
 
-      if (transcriptError) throw transcriptError
+      // if (transcriptError) throw transcriptError
 
-      // 翻訳データを取得
-      const { data: translationData, error: translationError } = await supabase
-        .from('translations')
-        .select('*')
-        .eq('video_id', videoData.id)
-        .eq('target_language', targetLanguage)
+      // // 翻訳データを取得
+      // const { data: translationData, error: translationError } = await supabase
+      //   .from('translations')
+      //   .select('*')
+      //   .eq('video_id', videoData.id)
+      //   .eq('target_language', targetLanguage)
 
-      if (translationError) throw translationError
+      // if (translationError) throw translationError
 
-      // トランスクリプトと翻訳をマージ
-      const mergedTranscripts: TranscriptItem[] = transcriptData?.map(transcript => {
-        const translation = translationData?.find(t => t.transcript_id === transcript.id)
-        return {
-          id: transcript.id,
-          start_time: transcript.start_time,
-          end_time: transcript.end_time,
-          original_text: transcript.text,
-          translated_text: translation?.translated_text || null,
-          language_code: transcript.language_code
-        }
-      }) || []
+      // // トランスクリプトと翻訳をマージ
+      // const mergedTranscripts: TranscriptItem[] = transcriptData?.map(transcript => {
+      //   const translation = translationData?.find(t => t.transcript_id === transcript.id)
+      //   return {
+      //     id: transcript.id,
+      //     start_time: transcript.start_time,
+      //     end_time: transcript.end_time,
+      //     original_text: transcript.text,
+      //     translated_text: translation?.translated_text || null,
+      //     language_code: transcript.language_code
+      //   }
+      // }) || []
 
-      setTranscripts(mergedTranscripts)
+      // setTranscripts(mergedTranscripts)
 
-      // 進行中の翻訳ジョブをチェック
-      const { data: jobData } = await supabase
-        .from('translation_jobs')
-        .select('*')
-        .eq('video_id', videoData.id)
-        .eq('target_language', targetLanguage)
-        .in('status', ['pending', 'processing'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+      // // 進行中の翻訳ジョブをチェック
+      // const { data: jobData } = await supabase
+      //   .from('translation_jobs')
+      //   .select('*')
+      //   .eq('video_id', videoData.id)
+      //   .eq('target_language', targetLanguage)
+      //   .in('status', ['pending', 'processing'])
+      //   .order('created_at', { ascending: false })
+      //   .limit(1)
+      //   .single()
 
-      if (jobData) {
-        setTranslationJob({
-          id: jobData.id,
-          status: jobData.status,
-          progress: jobData.progress || 0,
-          target_language: jobData.target_language,
-          estimated_completion: jobData.estimated_completion
-        })
+      // if (jobData) {
+      //   setTranslationJob({
+      //     id: jobData.id,
+      //     status: jobData.status,
+      //     progress: jobData.progress || 0,
+      //     target_language: jobData.target_language,
+      //     estimated_completion: jobData.estimated_completion
+      //   })
         
-        // 進行中の場合は定期的にステータスをチェック
-        if (jobData.status === 'processing') {
-          startPollingTranslationStatus(jobData.id)
-        }
-      }
+      //   // 進行中の場合は定期的にステータスをチェック
+      //   if (jobData.status === 'processing') {
+      //     startPollingTranslationStatus(jobData.id)
+      //   }
+      // }
 
     } catch (error) {
       console.error('Failed to fetch video data:', error)
@@ -127,41 +127,41 @@ const WatchPage: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [videoId, targetLanguage])
+  }, [videoId])
 
-  // 翻訳ステータスのポーリング
-  const startPollingTranslationStatus = useCallback((jobId: string) => {
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/translate/status/${jobId}`)
-        if (!response.ok) return
+  // // 翻訳ステータスのポーリング
+  // const startPollingTranslationStatus = useCallback((jobId: string) => {
+  //   const pollInterval = setInterval(async () => {
+  //     try {
+  //       const response = await fetch(`/api/translate/status/${jobId}`)
+  //       if (!response.ok) return
 
-        const jobStatus = await response.json()
+  //       const jobStatus = await response.json()
         
-        setTranslationJob(prev => prev ? {
-          ...prev,
-          status: jobStatus.status,
-          progress: jobStatus.progress || 0,
-          estimated_completion: jobStatus.estimated_completion
-        } : null)
+  //       setTranslationJob(prev => prev ? {
+  //         ...prev,
+  //         status: jobStatus.status,
+  //         progress: jobStatus.progress || 0,
+  //         estimated_completion: jobStatus.estimated_completion
+  //       } : null)
 
-        // 完了または失敗した場合はポーリングを停止
-        if (jobStatus.status === 'completed' || jobStatus.status === 'failed') {
-          clearInterval(pollInterval)
+  //       // 完了または失敗した場合はポーリングを停止
+  //       if (jobStatus.status === 'completed' || jobStatus.status === 'failed') {
+  //         clearInterval(pollInterval)
           
-          if (jobStatus.status === 'completed') {
-            // 翻訳が完了したらデータを再取得
-            fetchVideoData()
-          }
-        }
-      } catch (error) {
-        console.error('Failed to poll translation status:', error)
-      }
-    }, 2000) // 2秒間隔でポーリング
+  //         if (jobStatus.status === 'completed') {
+  //           // 翻訳が完了したらデータを再取得
+  //           fetchVideoData()
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to poll translation status:', error)
+  //     }
+  //   }, 2000) // 2秒間隔でポーリング
 
-    // コンポーネントがアンマウントされた時にクリーンアップ
-    return () => clearInterval(pollInterval)
-  }, [fetchVideoData])
+  //   // コンポーネントがアンマウントされた時にクリーンアップ
+  //   return () => clearInterval(pollInterval)
+  // }, [fetchVideoData])
 
   useEffect(() => {
     fetchVideoData()
@@ -174,50 +174,49 @@ const WatchPage: React.FC = () => {
 
   // タイムスタンプクリック時の動画シーク
   const handleTimestampClick = useCallback((time: number) => {
-    if (playerRef && playerRef.seekTo) {
-      playerRef.seekTo(time)
+    if (playerRef) {
       setCurrentTime(time)
     }
   }, [playerRef])
 
-  // 翻訳開始
-  const startTranslation = async () => {
-    if (!videoId) return
+  // // 翻訳開始
+  // const startTranslation = async () => {
+  //   if (!videoId) return
 
-    try {
-      const response = await fetch('/api/videos/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          url: `https://www.youtube.com/watch?v=${videoId}`,
-          targetLanguage
-        })
-      })
+  //   try {
+  //     const response = await fetch('/api/videos/analyze', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({ 
+  //         url: `https://www.youtube.com/watch?v=${videoId}`,
+  //         targetLanguage
+  //       })
+  //     })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || '翻訳の開始に失敗しました')
-      }
+  //     if (!response.ok) {
+  //       const errorData = await response.json()
+  //       throw new Error(errorData.error || '翻訳の開始に失敗しました')
+  //     }
 
-      const result = await response.json()
+  //     const result = await response.json()
       
-      if (result.translationJobId) {
-        setTranslationJob({
-          id: result.translationJobId,
-          status: 'pending',
-          progress: 0,
-          target_language: targetLanguage
-        })
+  //     if (result.translationJobId) {
+  //       setTranslationJob({
+  //         id: result.translationJobId,
+  //         status: 'pending',
+  //         progress: 0,
+  //         target_language: targetLanguage
+  //       })
         
-        startPollingTranslationStatus(result.translationJobId)
-      }
-    } catch (error) {
-      console.error('Failed to start translation:', error)
-      alert(error instanceof Error ? error.message : '翻訳の開始に失敗しました')
-    }
-  }
+  //       startPollingTranslationStatus(result.translationJobId)
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to start translation:', error)
+  //     alert(error instanceof Error ? error.message : '翻訳の開始に失敗しました')
+  //   }
+  // }
 
   // エラー時の再試行
   const handleRetry = () => {
@@ -278,8 +277,8 @@ const WatchPage: React.FC = () => {
     )
   }
 
-  const hasTranslations = transcripts.some(t => t.translated_text)
-  const isTranslating = translationJob && (translationJob.status === 'pending' || translationJob.status === 'processing')
+  // const hasTranslations = transcripts.some(t => t.translated_text)
+  // const isTranslating = translationJob && (translationJob.status === 'pending' || translationJob.status === 'processing')
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -299,21 +298,21 @@ const WatchPage: React.FC = () => {
                   {video.title}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  {video.channel_title} • {video.duration ? `${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}` : ''}
+                  {video.duration ? `${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}` : ''}
                 </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-3">
               {/* 翻訳開始ボタン */}
-              {!isTranslating && (
+              {/* {!isTranslating && (
                 <button
                   onClick={startTranslation}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   翻訳開始
                 </button>
-              )}
+              )} */}
               
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                 <Share2 className="w-5 h-5" />
@@ -331,48 +330,29 @@ const WatchPage: React.FC = () => {
 
       {/* メインコンテンツ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* 動画プレイヤー (60%) */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <VideoPlayer
-                videoId={videoId!}
-                onTimeUpdate={handleTimeUpdate}
-                onPlayerReady={setPlayerRef}
-                className="w-full"
-              />
-              
-              {/* 動画情報 */}
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  {video.title}
-                </h2>
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                  <span>{video.channel_title}</span>
-                  <span>{new Date(video.created_at).toLocaleDateString('ja-JP')}</span>
-                </div>
-                
-                {video.description && (
-                  <div className="text-sm text-gray-700">
-                    <p className="line-clamp-3">{video.description}</p>
-                  </div>
-                )}
+        <div className="max-w-4xl mx-auto">
+          {/* 動画プレイヤー */}
+          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <VideoPlayer
+              videoId={videoId!}
+              onTimeUpdate={handleTimeUpdate}
+              className="w-full"
+            />
+            
+            {/* 動画情報 */}
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {video.title}
+              </h2>
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                <span>{new Date(video.created_at).toLocaleDateString('ja-JP')}</span>
               </div>
-            </div>
-          </div>
-          
-          {/* トランスクリプト表示 (40%) */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border h-full">
-              <TranscriptDisplay
-                transcripts={transcripts}
-                currentTime={currentTime}
-                onTimestampClick={handleTimestampClick}
-                targetLanguage={targetLanguage}
-                isTranslating={isTranslating || false}
-                translationProgress={translationJob?.progress || 0}
-                className="h-full"
-              />
+              
+              {video.description && (
+                <div className="text-sm text-gray-700">
+                  <p className="line-clamp-3">{video.description}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

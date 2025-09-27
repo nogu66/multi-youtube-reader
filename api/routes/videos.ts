@@ -74,11 +74,18 @@ router.post('/analyze', async (req, res) => {
       video = newVideo
 
       // トランスクリプトを取得
+      console.log(`Fetching transcript for video: ${videoId}`)
       const transcript = await getVideoTranscript(videoId)
-      
+      console.log(`Retrieved ${transcript.length} transcript items`)
+
+      if (transcript.length === 0) {
+        throw new Error('No transcript data available for this video')
+      }
+
       // 言語を検出
       const sourceLanguage = await detectLanguage(transcript[0]?.text || '')
-      
+      console.log(`Detected language: ${sourceLanguage}`)
+
       // トランスクリプトをデータベースに保存
       const transcriptData = transcript.map(item => ({
         video_id: video.id,
@@ -93,8 +100,11 @@ router.post('/analyze', async (req, res) => {
         .insert(transcriptData)
 
       if (transcriptError) {
+        console.error('Transcript save error:', transcriptError)
         throw new Error('Failed to save transcript')
       }
+
+      console.log(`Saved ${transcriptData.length} transcript items to database`)
     }
 
     // 翻訳ジョブを作成
