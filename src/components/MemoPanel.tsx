@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Edit3, Trash2, Clock, Save, X } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-
-interface Memo {
-  id: string
-  video_id: string
-  content: string
-  timestamp_seconds?: number
-  created_at: string
-  updated_at: string
-}
+import { Clock, Plus, Edit2, Trash2, Save, X } from 'lucide-react'
+import type { Memo } from '../types/memo'
 
 interface MemoPanelProps {
   videoId: string
@@ -26,6 +17,7 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState<MemoFormData>({
     content: '',
     timestamp_seconds: undefined
@@ -34,16 +26,15 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
   // メモ一覧を取得
   const fetchMemos = async () => {
     try {
-      const { data, error } = await supabase
-        .from('memos')
-        .select('*')
-        .eq('video_id', videoId)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
+      const response = await fetch(`http://localhost:3001/api/videos/${videoId}/memos`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch memos')
+      }
+      const data = await response.json()
       setMemos(data || [])
     } catch (error) {
       console.error('Error fetching memos:', error)
+      setError('メモの取得に失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -54,23 +45,28 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
     if (!formData.content.trim()) return
 
     try {
-      const { data, error } = await supabase
-        .from('memos')
-        .insert({
-          video_id: videoId,
+      const response = await fetch(`http://localhost:3001/api/videos/${videoId}/memos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           content: formData.content.trim(),
           timestamp_seconds: formData.timestamp_seconds
         })
-        .select()
-        .single()
+      })
 
-      if (error) throw error
-      
+      if (!response.ok) {
+        throw new Error('Failed to create memo')
+      }
+
+      const data = await response.json()
       setMemos(prev => [data, ...prev])
       setFormData({ content: '', timestamp_seconds: undefined })
       setIsCreating(false)
     } catch (error) {
       console.error('Error creating memo:', error)
+      setError('メモの作成に失敗しました')
     }
   }
 
@@ -79,23 +75,28 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
     if (!formData.content.trim()) return
 
     try {
-      const { data, error } = await supabase
-        .from('memos')
-        .update({
+      const response = await fetch(`http://localhost:3001/api/memos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           content: formData.content.trim(),
           timestamp_seconds: formData.timestamp_seconds
         })
-        .eq('id', id)
-        .select()
-        .single()
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error('Failed to update memo')
+      }
 
+      const data = await response.json()
       setMemos(prev => prev.map(memo => memo.id === id ? data : memo))
       setEditingId(null)
       setFormData({ content: '', timestamp_seconds: undefined })
     } catch (error) {
       console.error('Error updating memo:', error)
+      setError('メモの更新に失敗しました')
     }
   }
 
@@ -104,15 +105,18 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
     if (!confirm('このメモを削除しますか？')) return
 
     try {
-      const { error } = await supabase
-        .from('memos')
-        .delete()
-        .eq('id', id)
+      const response = await fetch(`http://localhost:3001/api/memos/${id}`, {
+        method: 'DELETE'
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error('Failed to delete memo')
+      }
+
       setMemos(prev => prev.filter(memo => memo.id !== id))
     } catch (error) {
       console.error('Error deleting memo:', error)
+      setError('メモの削除に失敗しました')
     }
   }
 
@@ -183,6 +187,19 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
       </div>
 
       <div className="p-4 space-y-4">
+        {/* エラー表示 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <p>{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-500 hover:text-red-700 text-sm mt-1"
+            >
+              閉じる
+            </button>
+          </div>
+        )}
+
         {/* 新規作成フォーム */}
         {isCreating && (
           <div className="border rounded-lg p-3 bg-gray-50">

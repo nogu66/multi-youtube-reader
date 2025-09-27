@@ -39,7 +39,7 @@ app.use(
 /**
  * error handler middleware
  */
-app.use((error: Error, req: Request, res: Response) => {
+app.use((error: Error, req: Request, res: Response, next: any) => {
   res.status(500).json({
     success: false,
     error: 'Server internal error',
