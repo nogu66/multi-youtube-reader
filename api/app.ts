@@ -7,6 +7,7 @@ import cors from 'cors'
 import authRoutes from './routes/auth.js'
 import videoRoutes from './routes/videos.js'
 import translateRoutes from './routes/translate.js'
+import memoRoutes from './routes/memos.js'
 
 const app: express.Application = express()
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use('/api/auth', authRoutes)
 app.use('/api/videos', videoRoutes)
 app.use('/api/translate', translateRoutes)
+app.use('/api', memoRoutes)
 
 /**
  * health

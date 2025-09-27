@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Settings, Download, Share2, AlertCircle, RefreshCw } from 'lucide-react'
 import VideoPlayer from '../components/VideoPlayer'
-// import TranscriptDisplay from '../components/TranscriptDisplay'
+import MemoPanel from '../components/MemoPanel'
 import { supabase } from '../lib/supabase'
 import type { Video } from '../lib/supabase'
 
@@ -29,7 +29,7 @@ const WatchPage: React.FC = () => {
   
   const [video, setVideo] = useState<Video | null>(null)
   // const [transcripts, setTranscripts] = useState<TranscriptItem[]>([])
-  const [, setCurrentTime] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   // const [translationJob, setTranslationJob] = useState<TranslationJob | null>(null)
@@ -330,30 +330,40 @@ const WatchPage: React.FC = () => {
 
       {/* メインコンテンツ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="max-w-4xl mx-auto">
-          {/* 動画プレイヤー */}
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-            <VideoPlayer
-              videoId={videoId!}
-              onTimeUpdate={handleTimeUpdate}
-              className="w-full"
-            />
-            
-            {/* 動画情報 */}
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                {video.title}
-              </h2>
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                <span>{new Date(video.created_at).toLocaleDateString('ja-JP')}</span>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左側: 動画プレイヤー */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+              <VideoPlayer
+                videoId={videoId!}
+                onTimeUpdate={handleTimeUpdate}
+                className="w-full"
+              />
               
-              {video.description && (
-                <div className="text-sm text-gray-700">
-                  <p className="line-clamp-3">{video.description}</p>
+              {/* 動画情報 */}
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  {video.title}
+                </h2>
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                  <span>{new Date(video.created_at).toLocaleDateString('ja-JP')}</span>
                 </div>
-              )}
+                
+                {video.description && (
+                  <div className="text-sm text-gray-700">
+                    <p className="line-clamp-3">{video.description}</p>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* 右側: メモパネル */}
+          <div className="lg:col-span-1">
+            <MemoPanel 
+              videoId={video.id} 
+              currentTime={currentTime}
+            />
           </div>
         </div>
       </main>
