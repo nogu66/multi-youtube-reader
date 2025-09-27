@@ -151,7 +151,7 @@ export const getVideoTranscript = async (videoId: string): Promise<TranscriptIte
 
     if (supportedCaptions.length > 0) {
       // 日本語字幕を優先、なければ英語
-      let selectedCaption = supportedCaptions.find(c => c.language === 'ja') ||
+      const selectedCaption = supportedCaptions.find(c => c.language === 'ja') ||
                            supportedCaptions.find(c => c.language === 'en')!
 
       console.log(`Selected caption: ${selectedCaption.language} (${selectedCaption.name})`)
@@ -182,7 +182,7 @@ export const getVideoTranscript = async (videoId: string): Promise<TranscriptIte
     }
 
     // フォールバック: デモ用のトランスクリプトを生成
-    return generateDemoTranscript(videoId)
+    return generateDemoTranscript()
 
   } catch (error) {
     console.error('Failed to get transcript:', error)
@@ -193,7 +193,7 @@ export const getVideoTranscript = async (videoId: string): Promise<TranscriptIte
 /**
  * デモ用のトランスクリプトを生成
  */
-function generateDemoTranscript(videoId: string): TranscriptItem[] {
+function generateDemoTranscript(): TranscriptItem[] {
   const demoTexts = [
     "Welcome to this video tutorial.",
     "Today we'll be learning about new technologies.",

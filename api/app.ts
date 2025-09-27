@@ -2,11 +2,7 @@
  * This is a API server
  */
 
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-} from 'express'
+import express, { type Request, type Response } from 'express'
 import cors from 'cors'
 import authRoutes from './routes/auth.js'
 import videoRoutes from './routes/videos.js'
@@ -30,7 +26,7 @@ app.use('/api/translate', translateRoutes)
  */
 app.use(
   '/api/health',
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request, res: Response): void => {
     res.status(200).json({
       success: true,
       message: 'ok',
@@ -41,7 +37,7 @@ app.use(
 /**
  * error handler middleware
  */
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((error: Error, req: Request, res: Response) => {
   res.status(500).json({
     success: false,
     error: 'Server internal error',

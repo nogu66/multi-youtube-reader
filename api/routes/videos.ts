@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { supabaseAdmin } from '../lib/supabase'
 import { getVideoInfo, getVideoTranscript, extractVideoId } from '../lib/youtube'
 import { translateBatch, detectLanguage } from '../lib/gemini'
-import type { Video, Transcript, Translation, TranslationJob } from '../lib/supabase'
+import type { Video } from '../lib/supabase'
 
 const router = Router()
 

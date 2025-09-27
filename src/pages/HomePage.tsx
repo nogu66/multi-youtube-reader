@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Youtube, Search, Clock, Play, Trash2, ExternalLink, Languages } from 'lucide-react'
+import { Youtube, Search, Clock, Play, Trash2, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import type { Video } from '../lib/supabase'
 
 interface VideoHistory {
   id: string
@@ -130,7 +129,7 @@ const HomePage: React.FC = () => {
         throw new Error(errorData.error || '動画の分析に失敗しました')
       }
 
-      const result = await response.json()
+      await response.json()
       
       // 分析が完了したら視聴ページへ遷移
       navigate(`/watch/${videoId}`)

@@ -29,12 +29,12 @@ const WatchPage: React.FC = () => {
   
   const [video, setVideo] = useState<Video | null>(null)
   // const [transcripts, setTranscripts] = useState<TranscriptItem[]>([])
-  const [currentTime, setCurrentTime] = useState(0)
+  const [, setCurrentTime] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   // const [translationJob, setTranslationJob] = useState<TranslationJob | null>(null)
   // const [targetLanguage, setTargetLanguage] = useState('ja')
-  const [playerRef, setPlayerRef] = useState<any>(null)
+  const [,] = useState<unknown>(null)
 
   // 動画データとトランスクリプトを取得
   const fetchVideoData = useCallback(async () => {
@@ -173,11 +173,11 @@ const WatchPage: React.FC = () => {
   }, [])
 
   // タイムスタンプクリック時の動画シーク
-  const handleTimestampClick = useCallback((time: number) => {
-    if (playerRef) {
-      setCurrentTime(time)
-    }
-  }, [playerRef])
+  // const handleTimestampClick = useCallback((time: number) => {
+  //   if (playerRef) {
+  //     setCurrentTime(time)
+  //   }
+  // }, [playerRef])
 
   // // 翻訳開始
   // const startTranslation = async () => {

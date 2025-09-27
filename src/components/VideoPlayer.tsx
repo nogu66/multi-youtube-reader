@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw } from 'lucide-react'
 
 interface VideoPlayerProps {
@@ -23,10 +23,30 @@ interface YouTubePlayer {
   isMuted: () => boolean
 }
 
+interface YouTubePlayerConfig {
+  height: string
+  width: string
+  videoId: string
+  playerVars: {
+    autoplay: number
+    controls: number
+    disablekb: number
+    fs: number
+    iv_load_policy: number
+    modestbranding: number
+    playsinline: number
+    rel: number
+  }
+  events: {
+    onReady: () => void
+    onStateChange: (event: { data: number }) => void
+  }
+}
+
 declare global {
   interface Window {
     YT: {
-      Player: new (elementId: string, config: any) => YouTubePlayer
+      Player: new (elementId: string, config: YouTubePlayerConfig) => YouTubePlayer
       PlayerState: {
         UNSTARTED: number
         ENDED: number
@@ -49,12 +69,72 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   const playerRef = useRef<YouTubePlayer | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const timeTrackingRef = useRef<NodeJS.Timeout | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [volume, setVolume] = useState(100)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isReady, setIsReady] = useState(false)
+
+  const startTimeTracking = useCallback(() => {
+    if (timeTrackingRef.current) {
+      clearInterval(timeTrackingRef.current)
+    }
+
+    timeTrackingRef.current = setInterval(() => {
+      if (playerRef.current && isPlaying) {
+        const time = playerRef.current.getCurrentTime()
+        setCurrentTime(time)
+        onTimeUpdate?.(time)
+      }
+    }, 1000)
+  }, [isPlaying, onTimeUpdate])
+
+  const handlePlayerReady = useCallback(() => {
+    if (playerRef.current) {
+      setDuration(playerRef.current.getDuration())
+      setVolume(playerRef.current.getVolume())
+      setIsMuted(playerRef.current.isMuted())
+      setIsReady(true)
+      onReady?.()
+    }
+  }, [onReady])
+
+  const handlePlayerStateChange = useCallback((event: { data: number }) => {
+    if (!playerRef.current) return
+
+    const state = event.data
+    setIsPlaying(state === window.YT.PlayerState.PLAYING)
+
+    if (state === window.YT.PlayerState.PLAYING) {
+      startTimeTracking()
+    }
+  }, [startTimeTracking])
+
+  const initializePlayer = useCallback(() => {
+    if (!containerRef.current || !window.YT) return
+
+    playerRef.current = new window.YT.Player('youtube-player', {
+      height: '100%',
+      width: '100%',
+      videoId: videoId,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        iv_load_policy: 3,
+        modestbranding: 1,
+        playsinline: 1,
+        rel: 0
+      },
+      events: {
+        onReady: handlePlayerReady,
+        onStateChange: handlePlayerStateChange
+      }
+    })
+  }, [videoId, handlePlayerReady, handlePlayerStateChange])
 
   // YouTube API を読み込み
   useEffect(() => {
@@ -78,7 +158,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
       }
     }
-  }, [videoId])
+  }, [videoId, initializePlayer])
 
   // seekTo プロパティが変更された時の処理
   useEffect(() => {
@@ -86,63 +166,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       playerRef.current.seekTo(seekTo, true)
     }
   }, [seekTo, isReady])
-
-  const initializePlayer = () => {
-    if (!containerRef.current || !window.YT) return
-
-    playerRef.current = new window.YT.Player('youtube-player', {
-      height: '100%',
-      width: '100%',
-      videoId: videoId,
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        iv_load_policy: 3,
-        modestbranding: 1,
-        playsinline: 1,
-        rel: 0
-      },
-      events: {
-        onReady: handlePlayerReady,
-        onStateChange: handlePlayerStateChange
-      }
-    })
-  }
-
-  const handlePlayerReady = () => {
-    if (playerRef.current) {
-      setDuration(playerRef.current.getDuration())
-      setVolume(playerRef.current.getVolume())
-      setIsMuted(playerRef.current.isMuted())
-      setIsReady(true)
-      onReady?.()
-    }
-  }
-
-  const handlePlayerStateChange = (event: { data: number }) => {
-    if (!playerRef.current) return
-
-    const state = event.data
-    setIsPlaying(state === window.YT.PlayerState.PLAYING)
-
-    if (state === window.YT.PlayerState.PLAYING) {
-      startTimeTracking()
-    }
-  }
-
-  const startTimeTracking = () => {
-    const updateTime = () => {
-      if (playerRef.current && isPlaying) {
-        const time = playerRef.current.getCurrentTime()
-        setCurrentTime(time)
-        onTimeUpdate?.(time)
-        requestAnimationFrame(updateTime)
-      }
-    }
-    requestAnimationFrame(updateTime)
-  }
 
   const togglePlayPause = () => {
     if (!playerRef.current) return

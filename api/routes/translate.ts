@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { supabaseAdmin } from '../lib/supabase'
-import type { TranslationJob } from '../lib/supabase'
 
 const router = Router()
 

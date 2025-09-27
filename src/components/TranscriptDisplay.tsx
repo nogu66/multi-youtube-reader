@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Clock, Languages, Copy, Check, Search, Filter } from 'lucide-react'
+import { Clock, Languages, Copy, Check, Search } from 'lucide-react'
 
 interface TranscriptItem {
   id: string
@@ -24,7 +24,6 @@ const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({
   transcripts,
   currentTime,
   onTimestampClick,
-  targetLanguage,
   isTranslating = false,
   translationProgress = 0,
   className = ''

@@ -20,10 +20,13 @@ export interface TranslationResult {
  */
 export async function translateText(
   text: string,
-  targetLanguage: string,
-  sourceLanguage: string = 'auto'
+  targetLanguage: string
 ): Promise<string> {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not set')
+    }
+    
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
     
     const prompt = `Translate the following text to ${targetLanguage}. Only return the translated text without any additional explanation or formatting:
@@ -46,8 +49,7 @@ ${text}`
  */
 export async function translateBatch(
   texts: string[],
-  targetLanguage: string,
-  sourceLanguage: string = 'auto'
+  targetLanguage: string
 ): Promise<string[]> {
   try {
     if (!process.env.GEMINI_API_KEY) {
