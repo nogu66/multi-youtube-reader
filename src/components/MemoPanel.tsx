@@ -333,7 +333,7 @@ const MemoPanel: React.FC<MemoPanelProps> = ({ videoId, currentTime }) => {
                           disabled={isCreating || editingId !== null}
                           className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => deleteMemo(memo.id)}
