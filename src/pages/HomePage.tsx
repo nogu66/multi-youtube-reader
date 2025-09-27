@@ -208,7 +208,7 @@ const HomePage: React.FC = () => {
           <div className="flex items-center">
             <Youtube className="w-8 h-8 text-red-500 mr-3" />
             <h1 className="text-2xl font-bold text-gray-900">
-              YouTube 動画保存
+              YouMemo
             </h1>
           </div>
         </div>
@@ -220,7 +220,7 @@ const HomePage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
             <Search className="w-5 h-5 mr-2" />
-            YouTube動画を分析
+            Add URL
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
